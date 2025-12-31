@@ -1,0 +1,21 @@
+.page-wrapper {
+  .page-body-wrapper {
+    display: flex;
+    position: relative;
+    top: var(--header-height);
+
+    .main-content {
+      margin-left: var(--sidebar-width);
+      width: calc(100% - var(--sidebar-width));
+      display: flex;
+      flex-direction: column;
+      min-height: calc(100vh - var(--header-height));
+
+      .page-body {
+        flex: 1;
+        padding: 31px 32px 0;
+        background-color: var(--bg-main);
+      }
+    }
+  }
+}

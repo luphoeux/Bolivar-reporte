@@ -1,0 +1,50 @@
+<div class="sidebar-wrapper">
+  <div class="logo-wrapper">
+    <a routerLink="/">
+      <img src="assets/images/logo.svg" alt="Logo" class="img-fluid logo-img">
+    </a>
+  </div>
+  <nav class="sidebar-main">
+    <div id="sidebar-menu">
+      <ul class="sidebar-links" id="simple-bar">
+        <ng-container *ngFor="let item of menuItems">
+          <!-- Title Section -->
+          <li class="sidebar-main-title" *ngIf="item.type === 'title'">
+            <div>
+              <h6>{{ item.title }}</h6>
+            </div>
+          </li>
+
+          <!-- Simple Link Section -->
+          <li class="sidebar-list" *ngIf="item.type === 'link'">
+            <a class="sidebar-link sidebar-title" [routerLink]="item.path" routerLinkActive="active" *ngIf="item.path">
+              <app-feather-icons [icon]="item.icon" [size]="18"></app-feather-icons>
+              <span>{{ item.title }}</span>
+            </a>
+            <a class="sidebar-link sidebar-title" href="javascript:void(0)" *ngIf="!item.path">
+              <app-feather-icons [icon]="item.icon" [size]="18"></app-feather-icons>
+              <span>{{ item.title }}</span>
+            </a>
+          </li>
+
+          <!-- Submenu Section -->
+          <li class="sidebar-list" *ngIf="item.type === 'sub'">
+            <a class="sidebar-link sidebar-title" href="javascript:void(0)" (click)="toggleMenu(item)" [class.active]="item.active">
+              <app-feather-icons [icon]="item.icon" [size]="18"></app-feather-icons>
+              <span>{{ item.title }}</span>
+              <div class="according-menu">
+                <i class="fa" [ngClass]="item.active ? 'fa-angle-down' : 'fa-angle-right'"></i>
+              </div>
+            </a>
+            <ul class="sidebar-submenu" [ngClass]="{ 'd-block': item.active }">
+              <li *ngFor="let child of item.children">
+                <a [routerLink]="child.path" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" *ngIf="child.path">{{ child.title }}</a>
+                <a href="javascript:void(0)" *ngIf="!child.path">{{ child.title }}</a>
+              </li>
+            </ul>
+          </li>
+        </ng-container>
+      </ul>
+    </div>
+  </nav>
+</div>

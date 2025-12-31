@@ -1,0 +1,40 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "🚀 Launch & Debug (Automatic)",
+      "url": "http://localhost:4200",
+      "webRoot": "${workspaceFolder}",
+      "userDataDir": "${workspaceFolder}/.vscode/chrome-debug-profile",
+      "sourceMaps": true,
+      "preLaunchTask": "npm: start",
+      "runtimeArgs": [
+        "--disable-features=IsolateOrigins,site-per-process"
+      ]
+    },
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "🌐 Debug: Chrome (Manual Start)",
+      "url": "http://localhost:4200",
+      "webRoot": "${workspaceFolder}",
+      "userDataDir": "${workspaceFolder}/.vscode/chrome-debug-profile",
+      "sourceMaps": true,
+      "runtimeArgs": [
+        "--disable-features=IsolateOrigins,site-per-process"
+      ]
+    },
+    {
+      "type": "chrome",
+      "request": "attach",
+      "name": "🔗 Attach: Chrome (Debug Port 9222)",
+      "port": 9222,
+      "url": "http://localhost:4200",
+      "webRoot": "${workspaceFolder}",
+      "sourceMaps": true
+    }
+  ],
+  "compounds": []
+}

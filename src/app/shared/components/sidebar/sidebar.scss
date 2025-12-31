@@ -1,0 +1,121 @@
+.sidebar-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: var(--sidebar-width);
+  height: 100vh;
+  background-color: #fff;
+  border-right: 1px solid #e5e7eb;
+  z-index: 1000;
+  transition: all 0.5s;
+
+  .logo-wrapper {
+    height: var(--header-height);
+    display: flex;
+    align-items: center;
+    justify-content: center; // Center the logo
+    padding: 0 20px;
+    border-bottom: 1px solid #e5e7eb;
+
+    .logo-img {
+      max-height: 55px; // Increased size
+    }
+  }
+
+  .sidebar-main {
+    height: calc(100vh - var(--header-height));
+    padding: 20px 0;
+    overflow-y: auto;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    .sidebar-links {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+
+      .sidebar-main-title {
+        padding: 5px 20px;
+        margin-top: 15px;
+
+        h6 {
+          font-size: 11px;
+          font-weight: 700;
+          color: #9ca3af;
+          margin: 0;
+          letter-spacing: 1px;
+          text-transform: uppercase;
+        }
+      }
+
+      .sidebar-list {
+        padding: 0 10px;
+
+        .sidebar-link {
+          display: flex;
+          align-items: center;
+          padding: 12px 15px;
+          color: #374151;
+          text-decoration: none;
+          font-size: 14px;
+          font-weight: 500;
+          border-radius: 6px;
+          transition: all 0.3s;
+          position: relative;
+
+          app-feather-icons {
+            margin-right: 12px;
+            color: #6b7280;
+          }
+
+          .according-menu {
+            margin-left: auto;
+          }
+
+          &:hover {
+            background-color: #f9fafb;
+          }
+        }
+      }
+
+      .sidebar-submenu {
+        list-style: none;
+        padding-left: 0;
+        margin: 5px 0 5px 0;
+        display: none;
+        border-left: 3px solid #2cc1ff;
+
+        &.d-block {
+          display: block;
+        }
+
+        li {
+          padding: 0;
+
+          a {
+            color: #6b7280;
+            text-decoration: none;
+            font-size: 13px;
+            transition: all 0.3s;
+            display: block;
+            padding: 10px 20px 10px 30px;
+            border-radius: 0;
+
+            &.active {
+              background-color: #e0f2fe;
+              color: var(--primary-color);
+              font-weight: 600;
+            }
+
+            &:hover:not(.active) {
+              background-color: #f8fafc;
+              color: #374151;
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,44 @@
+{
+    // Configuración del editor
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": null, // Usa el formatter por defecto del lenguaje (instala Prettier si lo necesitas)
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": "explicit"
+    },
+    // Configuración de archivos
+    "files.autoSave": "onFocusChange",
+    "files.exclude": {
+        "**/.git": true,
+        "**/.DS_Store": true,
+        "**/node_modules": true,
+        "**/dist": true
+    },
+    // Configuración de búsqueda
+    "search.exclude": {
+        "**/node_modules": true,
+        "**/dist": true,
+        "**/.vscode/chrome-debug-profile": true,
+        "**/.vscode/edge-debug-profile": true
+    },
+    // Configuración de JavaScript/TypeScript
+    "javascript.updateImportsOnFileMove.enabled": "always",
+    "typescript.updateImportsOnFileMove.enabled": "always",
+    // Configuración de ESLint
+    "eslint.validate": [
+        "javascript",
+        "javascriptreact"
+    ],
+    // Configuración de debugging
+    "debug.javascript.autoAttachFilter": "smart",
+    "debug.javascript.terminalOptions": {
+        "skipFiles": [
+            "<node_internals>/**"
+        ]
+    },
+    // Configuración de terminal
+    "terminal.integrated.defaultProfile.windows": "PowerShell",
+    // Emmet
+    "emmet.includeLanguages": {
+        "javascript": "javascriptreact"
+    }
+}

@@ -1,0 +1,37 @@
+<div class="header-main-container">
+  <!-- Top Row: Moon and Profile -->
+  <div class="header-top-row d-flex justify-content-end align-items-center">
+    <div class="header-top-content d-flex align-items-center">
+      <div class="mode me-3">
+        <app-feather-icons [icon]="'moon'" [size]="18"></app-feather-icons>
+      </div>
+      <div class="profile-nav">
+        <div class="media profile-media">
+          <img src="https://ui-avatars.com/api/?name=Info+Solunes&background=2CC1FF&color=fff" class="rounded-circle avatar-img" alt="">
+          <div class="media-body">
+            <span>Info Solunes</span>
+            <p class="mb-0 font-roboto">Superadmin <i class="middle fa fa-angle-down"></i></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Row: Title and Breadcrumb -->
+  <div class="header-bottom-row d-flex justify-content-between align-items-center">
+    <div class="bottom-left">
+      <h4 class="page-title mb-0">Reportes De Membresías</h4>
+    </div>
+    <div class="bottom-right">
+      <div class="breadcrumb-wrapper">
+        <ol class="breadcrumb mb-0">
+          <li class="breadcrumb-item">
+            <a routerLink="/"><app-feather-icons [icon]="'home'" [size]="14"></app-feather-icons></a>
+          </li>
+          <li class="breadcrumb-item">/</li>
+          <li class="breadcrumb-item active">Reportes De Membresías</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</div>
