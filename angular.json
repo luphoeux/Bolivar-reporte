@@ -22,6 +22,7 @@
           "options": {
             "outputPath": "dist/bolivar-reporteria",
             "browser": "src/main.ts",
+
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
