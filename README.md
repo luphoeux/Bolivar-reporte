@@ -1,59 +1,47 @@
-# BolivarAngular
+# Bolivar Reporte (Angular Admin)
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.0.4.
+Este proyecto es el módulo de reportería para el Club Bolívar, desarrollado en Angular. Incluye reportes detallados de membresías, KPIs y filtros avanzados.
 
-## Development server
+## Características Principales
 
-To start a local development server, run:
+- **Reporte de Membresías**: Listado completo de socios con paginación, filtros y búsqueda.
+- **Detalle de Pagos**: Modal interactivo para ver el desglose de cuotas pagadas y deudas.
+- **UX Premium**: Diseño moderno con Bootstrap 5, iconos Feather y estilos personalizados.
+- **Exportación**: Datos listos para ser exportados (funcionalidad base).
+- **Responsive**: Adaptable a diferentes tamaños de pantalla.
 
-```bash
-ng serve
-```
+## Instalación
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+1.  Clonar el repositorio:
 
-## Code scaffolding
+    ```bash
+    git clone https://github.com/TU_USUARIO/Bolivar-reporte.git
+    cd Bolivar-reporte
+    ```
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+2.  Instalar dependencias:
 
-```bash
-ng generate component component-name
-```
+    ```bash
+    npm install
+    ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+3.  Ejecutar en desarrollo:
+    ```bash
+    npm start
+    ```
+    Visita `http://localhost:4200`
 
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+## Build para Producción
 
 ```bash
-ng test
+npm run build
 ```
 
-## Running end-to-end tests
+Genera los archivos estáticos en la carpeta `dist/`.
 
-For end-to-end (e2e) testing, run:
+## Tecnologías
 
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+- Angular 16+
+- Bootstrap 5
+- SASS/SCSS
+- Feather Icons
