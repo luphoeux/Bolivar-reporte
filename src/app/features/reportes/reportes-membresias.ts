@@ -31,6 +31,7 @@ export class ReportesMembresias implements OnInit {
   // UX State
   isLoading = true;
   showDetailModal = false;
+  showFilterSuccess = false;
   selectedMember: any = null;
   paymentBreakdown: { label: string; value: number }[] = [];
 
@@ -41,29 +42,29 @@ export class ReportesMembresias implements OnInit {
       color: 'success',
       items: [
         { label: 'Total Membresías', value: '0' },
-        { label: 'Total Ventas', value: '0' },
-        { label: 'Monto Total', value: '0 Bs', isHighlight: true },
-        { label: 'Service Fee', value: '0 Bs' }
+        { label: 'Total Ventas', value: '0' }
       ]
     },
     {
-      title: 'Socio Dorado',
-      icon: 'award',
-      color: 'warning',
-      items: [
-        { label: 'Total Membresías', value: '0' },
-        { label: 'Total Ventas', value: '0' },
-        { label: 'Monto Total', value: '0 Bs', isHighlight: true }
-      ]
-    },
-    {
-      title: 'Socio Celeste',
-      icon: 'star',
+      title: 'Métodos de Pago',
+      icon: 'credit-card',
       color: 'info',
       items: [
-        { label: 'Total Membresías', value: '0' },
-        { label: 'Total Ventas', value: '0' },
-        { label: 'Monto Total', value: '0 Bs', isHighlight: true }
+        { label: 'Caja/Efectivo', value: '0' },
+        { label: 'Link de pago', value: '0' },
+        { label: 'Pago con Tarjeta', value: '0' },
+        { label: 'Pago con QR', value: '0' }
+      ]
+    },
+    {
+      title: 'Ejecutivos de Ventas',
+      icon: 'users',
+      color: 'success',
+      items: [
+        { label: 'Adriana', value: '0 Bs' },
+        { label: 'Enrique', value: '0 Bs' },
+        { label: 'Steph', value: '0 Bs' },
+        { label: 'Sergio', value: '0 Bs' }
       ]
     },
     {
@@ -79,14 +80,17 @@ export class ReportesMembresias implements OnInit {
   ];
   
   // Filters State
-  filterData = {
-    evento: null,
+  filterData: any = {
+    evento: 2025,
     ci: '',
     email: '',
     tipoReserva: null,
     antiguedad: null,
     canalVenta: null,
-    soloConSaldo: false
+    soloConSaldo: false,
+    producto: null,
+    startDate: null,
+    endDate: null
   };
 
   // Filter Options
@@ -94,6 +98,7 @@ export class ReportesMembresias implements OnInit {
   uniqueTypes: any[] = []; // Mapped to Categoria
   uniqueAntiguedad: any[] = []; // Mapped to Antigüedad
   uniqueChannels: any[] = []; // Mapped to Vendedor
+  uniqueProducts: any[] = []; // Mapped to Producto
 
   constructor(
     private membersService: MembersService,
@@ -138,21 +143,93 @@ export class ReportesMembresias implements OnInit {
   populateFilterOptions() {
     // Unique Gestiones
     this.uniqueEvents = [...new Set(this.members.map(m => m['Gestión']).filter(x => x))].sort();
+    
+    // Set default filter to 2025 if available, otherwise first available year
+    if (!this.filterData.evento) {
+        this.filterData.evento = this.uniqueEvents.includes(2025) ? 2025 : (this.uniqueEvents[0] || null);
+        // Apply initial filter filtering effectively by year immediately
+        this.applyFilters(); 
+    }
 
-    // Unique Categories
-    this.uniqueTypes = [...new Set(this.members.map(m => m['Categoría']).filter(x => x))].sort();
+    // Unique Categories - Initial population
+    this.updateCategoryList();
     
     // Unique Antigüedad
     this.uniqueAntiguedad = [...new Set(this.members.map(m => m['Antigüedad']).filter(x => x))].sort();
     
-    // Unique Vendedores
-    this.uniqueChannels = [...new Set(this.members.map(m => m.Vendedor).filter(x => x))].sort();
+    // Unique Vendedores - Dependent on CURRENT filtered data (which includes year filter)
+    // We use 'this.filteredMembers' instead of 'this.members' if we want it to react to the year changes,
+    // BUT 'populateFilterOptions' is usually called once. 
+    // To make it dynamic, we should probably update the executive list whenever filters change,
+    // OR just base this initial population on the default year we just set.
+    
+    // Let's gather executives from the members that match the default/current year
+    const currentYearMembers = this.members.filter(m => String(m['Gestión']) === String(this.filterData.evento));
+    
+    this.uniqueChannels = [...new Set(currentYearMembers.map(m => m.Vendedor).filter(x => x))].sort();
+
+    // Unique Membership Types
+    this.uniqueProducts = ['Sociedades', 'Abonos', 'Combos'];
   }
+
+  updateExecutiveList() {
+    // Determine the year to usage (filterData.evento or no filter)
+    // If filterData.evento is null, we might want to show ALL executives across all years, 
+    // or keep the last filtered list. Let's assume matches current year selection.
+    
+    let membersToConsider = this.members;
+    if (this.filterData.evento) {
+        membersToConsider = this.members.filter(m => String(m['Gestión']) === String(this.filterData.evento));
+    }
+
+    this.uniqueChannels = [...new Set(membersToConsider.map(m => m.Vendedor).filter(x => x))].sort();
+    
+    // Clear selected executive if they are no longer in the list
+    if (this.filterData.canalVenta && !this.uniqueChannels.includes(this.filterData.canalVenta)) {
+        this.filterData.canalVenta = null;
+    }
+  }
+
+  updateCategoryList() {
+      // 1. Filter by Year first
+      let consideredMembers = this.members;
+      if (this.filterData.evento) {
+          consideredMembers = this.members.filter(m => String(m['Gestión']) === String(this.filterData.evento));
+      }
+
+      // 2. Filter by Product (Membresía) if selected
+      if (this.filterData.producto) {
+          const selected = this.filterData.producto;
+          consideredMembers = consideredMembers.filter(m => {
+              const productLower = (m.Producto || '').toLowerCase();
+              if (selected === 'Combos') {
+                  return productLower.includes('combo');
+              } else if (selected === 'Abonos') {
+                  return productLower.includes('abono') && !productLower.includes('combo');
+              } else { // Sociedades
+                  return !productLower.includes('abono') && !productLower.includes('combo');
+              }
+          }); 
+      }
+
+      // 3. Extract Unique Categories
+      this.uniqueTypes = [...new Set(consideredMembers.map(m => m['Categoría']).filter(x => x))].sort();
+
+      // Clear selected category if it's no longer valid
+      if (this.filterData.tipoReserva && !this.uniqueTypes.includes(this.filterData.tipoReserva)) {
+          this.filterData.tipoReserva = null;
+      }
+  }
+
 
   calculateStats() {
     const total = this.filteredMembers.length;
     const totalAmount = this.filteredMembers.reduce((acc, curr) => acc + (curr['Total Ingreso'] || 0), 0);
     
+    // Calculate counts for Socios vs Abonos
+    const abonosCount = this.filteredMembers.filter(m => (m.Producto || '').toLowerCase().includes('abono')).length;
+    const sociosCount = total - abonosCount;
+
     // Calculate by category
     const dorado = this.filteredMembers.filter(m => m['Categoría'] === 'Socio Dorado');
     const celeste = this.filteredMembers.filter(m => m['Categoría'] === 'Socio Celeste');
@@ -163,22 +240,89 @@ export class ReportesMembresias implements OnInit {
     const platinoAmount = platino.reduce((acc, curr) => acc + (curr['Total Ingreso'] || 0), 0);
 
     // Update KPIs
-    this.stats[0].items[0].value = total.toLocaleString();
-    this.stats[0].items[1].value = total.toLocaleString();
-    this.stats[0].items[2].value = `${totalAmount.toLocaleString()} Bs`;
-    this.stats[0].items[3].value = '0 Bs'; 
+    // Card 1: Membresías Pagadas (Counts only)
+    this.stats[0].items[0].label = 'Sociedades';
+    this.stats[0].items[0].value = sociosCount.toLocaleString();
+    
+    this.stats[0].items[1].label = 'Abonos';
+    this.stats[0].items[1].value = abonosCount.toLocaleString();
 
-    this.stats[1].items[0].value = dorado.length.toLocaleString();
-    this.stats[1].items[1].value = dorado.length.toLocaleString();
-    this.stats[1].items[2].value = `${doradoAmount.toLocaleString()} Bs`;
+    // this.stats[0].items[2].value = `${totalAmount.toLocaleString()} Bs`; // Removed as per request 
 
-    this.stats[2].items[0].value = celeste.length.toLocaleString();
-    this.stats[2].items[1].value = celeste.length.toLocaleString();
-    this.stats[2].items[2].value = `${celesteAmount.toLocaleString()} Bs`;
+    // Card 2: Métodos de Pago
+    const qrs = this.filteredMembers.filter(m => {
+        const method = (m['Método de Pago'] || m['Forma de Pago'] || m['Tipo de Pago'] || '').toLowerCase();
+        return method.includes('qr');
+    }).length;
+    
+    const cards = this.filteredMembers.filter(m => {
+        const method = (m['Método de Pago'] || m['Forma de Pago'] || m['Tipo de Pago'] || '').toLowerCase();
+        return method.includes('tarjeta');
+    }).length;
+    
+    const links = this.filteredMembers.filter(m => {
+        const method = (m['Método de Pago'] || m['Forma de Pago'] || m['Tipo de Pago'] || '').toLowerCase();
+        return method.includes('link');
+    }).length;
+    
+    const cash = this.filteredMembers.filter(m => {
+        const method = (m['Método de Pago'] || m['Forma de Pago'] || m['Tipo de Pago'] || '').toLowerCase();
+        return method.includes('efectivo') || method.includes('caja');
+    }).length;
 
-    this.stats[3].items[0].value = platino.length.toLocaleString();
-    this.stats[3].items[1].value = platino.length.toLocaleString();
-    this.stats[3].items[2].value = `${platinoAmount.toLocaleString()} Bs`;
+    this.stats[1].title = 'Métodos de Pago';
+    this.stats[1].icon = 'credit-card';
+    this.stats[1].color = 'info';
+    this.stats[1].items = [
+        { label: 'Caja/Efectivo', value: cash.toLocaleString() },
+        { label: 'Link de pago', value: links.toLocaleString() },
+        { label: 'Pago con Tarjeta', value: cards.toLocaleString() },
+        { label: 'Pago con QR', value: qrs.toLocaleString() }
+    ];
+
+    // Card 3: Ejecutivos de Ventas (Dynamic Top 4)
+    // Group by Vendedor and sum Total Ingreso
+    const vendorStats: { [key: string]: number } = {};
+    
+    this.filteredMembers.forEach(m => {
+        const vendor = m.Vendedor || 'Sin Asignar';
+        const income = m['Total Ingreso'] || 0;
+        vendorStats[vendor] = (vendorStats[vendor] || 0) + income;
+    });
+
+    // Convert to array and sort by income descending
+    const sortedVendors = Object.keys(vendorStats)
+        .map(key => ({ label: key, value: vendorStats[key] }))
+        .sort((a, b) => b.value - a.value)
+        .slice(0, 4); // Take top 4
+
+    this.stats[2].title = 'Ejecutivos de Ventas';
+    this.stats[2].icon = 'users'; 
+    this.stats[2].color = 'success';
+    
+    // Map to stats items, ensure we have at least empty state if no data
+    if (sortedVendors.length > 0) {
+        this.stats[2].items = sortedVendors.map(v => ({
+            label: v.label.split(' ')[0], // Show first name only to save space
+            value: `${v.value.toLocaleString()} Bs`
+        }));
+    } else {
+        this.stats[2].items = [
+            { label: 'N/A', value: '0 Bs' }
+        ];
+    }
+
+    // Card 4: Antigüedad (Nuevos vs Antiguos)
+    const nuevosCount = this.filteredMembers.filter(m => (m['Antigüedad'] || '').toLowerCase().includes('nuevo')).length;
+    const antiguosCount = this.filteredMembers.filter(m => (m['Antigüedad'] || '').toLowerCase().includes('antiguo')).length;
+
+    this.stats[3].title = 'Antigüedad';
+    this.stats[3].icon = 'clock'; // Or 'calendar'
+    this.stats[3].color = 'primary';
+    this.stats[3].items = [
+        { label: 'Nuevos', value: nuevosCount.toLocaleString() },
+        { label: 'Antiguos', value: antiguosCount.toLocaleString() }
+    ];
   }
 
   updatePagination() {
@@ -191,6 +335,8 @@ export class ReportesMembresias implements OnInit {
     this.endIndex = Math.min(endIndex, this.filteredMembers.length);
     this.generatePageNumbers();
   }
+
+
 
   applyFilters() {
     this.filteredMembers = this.members.filter(m => {
@@ -235,13 +381,62 @@ export class ReportesMembresias implements OnInit {
         match = false;
       }
 
+      // Filter by Producto (Membresía)
+      if (this.filterData.producto) {
+        const productLower = (m.Producto || '').toLowerCase();
+        
+        if (this.filterData.producto === 'Combos') {
+            if (!productLower.includes('combo')) match = false;
+        } else if (this.filterData.producto === 'Abonos') {
+            if (!productLower.includes('abono') || productLower.includes('combo')) match = false;
+        } else if (this.filterData.producto === 'Sociedades') {
+            if (productLower.includes('abono') || productLower.includes('combo')) match = false;
+        }
+      }
+
+      // Filter by Date Range (Fecha de Alta)
+      if (this.filterData.startDate) {
+          const mDate = new Date(m['Fecha de Alta']);
+          // Check for valid date
+          if (!isNaN(mDate.getTime())) {
+              const start = new Date(this.filterData.startDate);
+              // Normalize times
+              start.setHours(0,0,0,0);
+              mDate.setHours(0,0,0,0);
+
+              if (mDate < start) match = false;
+          }
+      }
+
+      if (this.filterData.endDate) {
+          const mDate = new Date(m['Fecha de Alta']);
+          if (!isNaN(mDate.getTime())) {
+              const end = new Date(this.filterData.endDate);
+              end.setHours(23,59,59,999);
+              
+              // We need a fresh copy or reset mDate if reused from above block in a real iterator, 
+              // but here mDate is fresh per 'if' block scope (const).
+              mDate.setHours(0,0,0,0); 
+
+              if (mDate > end) match = false;
+          }
+      }
+
       return match;
     });
     
     this.currentPage = 1; // Reset to first page
     this.calculateStats();
     this.updatePagination();
+
+    // Show success message
+    this.showFilterSuccess = true;
+    setTimeout(() => {
+        this.showFilterSuccess = false;
+    }, 3000);
   }
+
+
 
   getCategoryClass(category: string): string {
     const cat = (category || '').toLowerCase();
@@ -265,12 +460,14 @@ export class ReportesMembresias implements OnInit {
       tipoReserva: null,
       antiguedad: null,
       canalVenta: null,
-      soloConSaldo: false
+      soloConSaldo: false,
+      producto: null,
+      startDate: null,
+      endDate: null
     };
-    this.filteredMembers = this.members;
-    this.currentPage = 1;
-    this.calculateStats();
-    this.updatePagination();
+    this.updateExecutiveList(); // Reset executive list based on default year
+    this.updateCategoryList(); // Reset category list
+    this.applyFilters();
   }
 
   generatePageNumbers() {

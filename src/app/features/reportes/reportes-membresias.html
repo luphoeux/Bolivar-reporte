@@ -1,6 +1,14 @@
 
 <div class="container-fluid p-4">
   
+  <!-- Success Message -->
+  <div *ngIf="showFilterSuccess" class="alert alert-success position-fixed top-0 end-0 m-4 shadow-sm" style="z-index: 1050; animation: fadeIn 0.3s;">
+    <div class="d-flex align-items-center">
+      <app-feather-icons [icon]="'check-circle'" [size]="18" class="me-2"></app-feather-icons>
+      <span class="fw-medium">Filtros aplicados correctamente</span>
+    </div>
+  </div>
+  
   <!-- Loading Spinner -->
   <div *ngIf="isLoading" class="d-flex justify-content-center align-items-center mb-4">
     <div class="spinner-border text-primary" role="status">
@@ -23,45 +31,64 @@
           </div>
         </div>
         <div class="card-body">
-          <div class="d-flex gap-3 align-items-end w-100">
-            <div class="flex-grow-1">
+          <div class="row g-3">
+            <!-- Row 1 -->
+            <div class="col-md-2">
               <label class="form-label fw-bold mb-1">Gestión</label>
-              <ng-select [items]="uniqueEvents" placeholder="Año" [(ngModel)]="filterData.evento"></ng-select>
+              <ng-select [items]="uniqueEvents" placeholder="Año" [(ngModel)]="filterData.evento" (change)="updateExecutiveList(); updateCategoryList()"></ng-select>
             </div>
             
-            <div class="flex-grow-1">
+            <div class="col-md-2">
               <label class="form-label fw-bold mb-1">CI</label>
               <input type="text" class="form-control" placeholder="Ej: 1234567" [(ngModel)]="filterData.ci">
             </div>
 
-            <div class="flex-grow-2">
-              <label class="form-label fw-bold mb-1">Socio</label>
+            <div class="col-md-2">
+              <label class="form-label fw-bold mb-1">Nombre</label>
               <input type="text" class="form-control" placeholder="Nombre o Apellido" [(ngModel)]="filterData.email">
             </div>
+
+            <div class="col-md-2">
+              <label class="form-label fw-bold mb-1">Membresía</label>
+              <ng-select [items]="uniqueProducts" placeholder="Seleccionar" [(ngModel)]="filterData.producto" (change)="updateCategoryList()"></ng-select>
+            </div>
             
-            <div class="flex-grow-1">
+            <div class="col-md-2">
               <label class="form-label fw-bold mb-1">Categoría</label>
               <ng-select [items]="uniqueTypes" placeholder="Seleccionar" [(ngModel)]="filterData.tipoReserva"></ng-select>
             </div>
 
-            <div class="flex-grow-1">
-              <label class="form-label fw-bold mb-1">Ejecutivo</label>
+            <div class="col-md-2">
+              <label class="form-label fw-bold mb-1">Ejecutivo de ventas</label>
               <ng-select [items]="uniqueChannels" placeholder="Vendedor" [(ngModel)]="filterData.canalVenta"></ng-select>
             </div>
 
-            <div class="flex-grow-1">
+            <!-- Row 2 -->
+            <div class="col-md-2">
               <label class="form-label fw-bold mb-1">Antigüedad</label>
               <ng-select [items]="uniqueAntiguedad" placeholder="Seleccionar" [(ngModel)]="filterData.antiguedad"></ng-select>
             </div>
 
-            <div class="d-flex align-items-center bg-light rounded px-3 border" style="height: 38px;">
-               <div class="form-check form-switch m-0">
-                <input class="form-check-input" type="checkbox" id="saldoSwitch" [(ngModel)]="filterData.soloConSaldo" (change)="applyFilters()">
-                <label class="form-check-label fw-medium ms-2" for="saldoSwitch">Deuda</label>
+            <div class="col-md-2">
+              <label class="form-label fw-bold mb-1">Desde</label>
+              <input type="date" class="form-control" [(ngModel)]="filterData.startDate">
+            </div>
+
+            <div class="col-md-2">
+              <label class="form-label fw-bold mb-1">Hasta</label>
+              <input type="date" class="form-control" [(ngModel)]="filterData.endDate">
+            </div>
+
+            <div class="col-md-2 d-flex align-items-end">
+               <div class="d-flex align-items-center bg-light rounded px-3 border w-100" style="height: 38px;">
+                 <div class="form-check form-switch m-0">
+                  <input class="form-check-input" type="checkbox" id="saldoSwitch" [(ngModel)]="filterData.soloConSaldo">
+                  <label class="form-check-label fw-medium ms-2" for="saldoSwitch">Mora</label>
+                </div>
               </div>
             </div>
 
-            <div style="min-width: 120px;">
+            <div class="col-md-2 d-flex align-items-end">
                <button class="btn btn-primary w-100 fw-bold" (click)="applyFilters()">
                 <app-feather-icons [icon]="'search'" [size]="18" class="me-1"></app-feather-icons>
                 Buscar
@@ -84,8 +111,8 @@
           </div>
           <div class="card-body p-3">
             <div *ngFor="let item of stat.items" class="d-flex justify-content-between align-items-center mb-2 last-child-mb-0">
-              <span class="text-muted">{{item.label}}</span>
-              <span [class]="item.isHighlight ? 'text-success fw-bold' : 'text-dark fw-medium'">{{item.value}}</span>
+              <span class="text-muted kpi-label">{{item.label}}</span>
+              <span class="kpi-value" [class]="item.isHighlight ? 'text-success fw-bold' : 'text-dark fw-medium'">{{item.value}}</span>
             </div>
           </div>
         </div>
@@ -95,26 +122,18 @@
     <!-- Main Data Card -->
     <div class="col-12">
       <div class="card">
-        <div class="card-header p-0 ps-4 pe-4">
-          <ul class="nav nav-tabs" id="myTab" role="tablist">
-            <li class="nav-item"><a class="nav-link active" id="sectores-tab" data-bs-toggle="tab" href="#sectores" role="tab">Sectores</a></li>
-            <li class="nav-item"><a class="nav-link" id="ventas-tab" data-bs-toggle="tab" href="#ventas" role="tab">Ventas por canal</a></li>
-            <li class="nav-item"><a class="nav-link" id="tickets-tab" data-bs-toggle="tab" href="#tickets" role="tab">Tickets</a></li>
-          </ul>
-        </div>
         <div class="card-body p-0">
-          <div class="tab-content" id="myTabContent">
-            <div class="tab-pane fade show active" id="sectores" role="tabpanel">
-              <div class="table-responsive">
+          <div class="table-responsive">
                 <table class="table table-hover">
                   <thead>
                     <tr>
                       <th>CI</th>
-                      <th>Socio</th>
+                      <th>Nombre</th>
+                      <th>Membresía</th>
                       <th>Categoría</th>
-                      <th>Cuotas Pagadas</th>
+                      <th>Monto pagado</th>
                       <th>Saldo</th>
-                      <th>Ejecutivo</th>
+                      <th>Ejecutivo de ventas</th>
                       <th>Antigüedad</th>
                     </tr>
                   </thead>
@@ -122,6 +141,7 @@
                     <tr *ngFor="let member of displayedMembers">
                       <td>{{member.CI}}</td>
                       <td class="fw-medium">{{member.Nombre}} {{member.Apellidos}}</td>
+                      <td>{{member.Producto}}</td>
                       <td>
                         <span class="badge" [ngClass]="getCategoryClass(member['Categoría'])">{{member['Categoría']}}</span>
                       </td>
@@ -140,13 +160,11 @@
                       <td>{{member['Antigüedad']}}</td>
                     </tr>
                     <tr *ngIf="displayedMembers.length === 0">
-                      <td colspan="7" class="text-center py-4">No se encontraron resultados</td>
+                      <td colspan="8" class="text-center py-4">No se encontraron resultados</td>
                     </tr>
                   </tbody>
                 </table>
               </div>
-            </div>
-          </div>
         </div>
         <div class="card-footer bg-white border-top-0 d-flex justify-content-between align-items-center p-4">
           <span class="text-muted font-roboto">
